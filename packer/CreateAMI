@@ -1,0 +1,30 @@
+{
+  "variables": {
+    "shared_credentials_file": "/home/cloud_user/.aws/credentials",
+    "aws_region": "us-east-2"
+  },
+  "builders": [{
+     "type": "amazon-ebs",
+     "access_key": "{{user `aws_access_key`}}",
+     "secret_key": "{{user `aws_secret_key`}}",
+     "region": "{{user `aws_region`}}",
+     "source_ami": "ami-02e680c4540db351e",
+     "instance_type": "t2.micro",
+     "ssh_username": "ec2-user",
+     "ami_name": "server.go_{{timestamp}}"
+  }],
+  "provisioners": [
+        {
+            "type": "shell",
+            "inline": [
+                "sudo yum update -y",
+                "sudo amazon-linux-extras install docker -y",
+                "sudo usermod -a -G docker ec2-user",
+                "sudo systemctl start docker",
+                "sudo systemctl enable docker",
+                "sudo docker pull shulyakav/answers:latest",
+                "sudo docker run --restart=always -d -p 8080:8080 shulyakav/answers:latest"
+            ]
+        }
+        ]
+}
